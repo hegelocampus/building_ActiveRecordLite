@@ -1,7 +1,7 @@
-Building ActiveRecordLite
+# Building ActiveRecordLite
 
 In this project, we build our own lite version of ActiveRecord.
-Learning Goals
+## Learning Goals
 
     Know when to write class methods and when to write instance methods
     Know how to use define_method inside a class method to add instance methods
@@ -9,19 +9,19 @@ Learning Goals
     Understand how ActiveRecord interfaces with the database
     Be able to write generic query methods that any class inheriting from SQLObject can use (e.g., all, where)
 
-Setup
+## Setup
 
 Download the skeleton.
 
 There are specs in it which will guide you through the project. Because they're using a database, they run a little slow, so it might be helpful to run them one file at a time:
 
-$ rspec spec/01_sql_object_spec.rb
+`$ rspec spec/01_sql_object_spec.rb`
 
 To aid in debugging, we've also coded an option into the skeleton so you can print all the queries and interpolation arguments that get sent to the SQL engine. To enable this, pass PRINT_QUERIES=true as an ENV variable when you run the rspec command.
 
-$ PRINT_QUERIES=true rspec spec/01_sql_object_spec.rb
+`$ PRINT_QUERIES=true rspec spec/01_sql_object_spec.rb`
 
-Phase 0: Implement my_attr_accessor
+## Phase 0: Implement my_attr_accessor
 
 This phase will get your gears turning on these new metaprogramming concepts before we dive into the project. You already know what the standard Ruby method attr_accessor does. What if Ruby didn't provide this convenient method for you?
 
@@ -30,7 +30,8 @@ In the lib/00_attr_accessor_object.rb file, implement a ::my_attr_accessor macro
 To do this, use define_method inside ::my_attr_accessor to define getter and setter instance methods. You'll want to investigate and use the instance_variable_get and instance_variable_set methods described here.
 
 There is a corresponding spec/00_attr_accessor_object_spec.rb spec file. Run it using bundle exec rspec to check your work.
-Phase I: SQLObject: Overview
+
+## Phase I: SQLObject: Overview
 
 Our job is to write a class, SQLObject, that will interact with the database. By the end of this phase, our ActiveRecord Lite will behave just like the real ActiveRecord::Base, with methods including:
 
@@ -66,12 +67,13 @@ ActiveSupport (part of Rails) has an inflector library that adds methods to Stri
 NB: you cannot always infer the name of the table. For example: the inflector library will, by default, pluralize human into humen, not humans. WAT. That's what your ::table_name= is for: so users of SQLObject can override the default, inferred table name.
 
 Make sure the ::table_name specs in spec/01_sql_object_spec are working and move onward!
-Phase Ib: Listing Columns
+
+## Phase Ib: Listing Columns
 
 In our sample database, the cats table has id, name, and owner_id columns. When we define a model class Cat < SQLObject, it should automatically have setter and getter methods for each of the columns. For instance, we want to be able to write:
 
 class Cat < SQLObject
-  # We'll explain finalize! later!
+  ** We'll explain finalize! later!**
   self.finalize!
 end
 
@@ -126,7 +128,7 @@ cat = Cat.new
 cat.name = "Gizmo"
 cat.name #=> "Gizmo"
 
-#attributes
+### attributes
 
 When we say cat.name = "Gizmo", how should we store the value "Gizmo"? We could save it in an instance variable that we dynamically call @name just like we did with my_attr_accessor, but then we wouldn't know which instance variables are associated with columns and which aren't. Remember that ActiveRecord::Base gives us a handy method #attributes that hands us a hash of all our model's columns and values.
 
@@ -137,7 +139,7 @@ cat.attributes #=> {}
 cat.name = "Gizmo"
 cat.attributes #=> { name: "Gizmo" }
 
-::finalize!
+### ::finalize!
 
 Now we can finally write ::finalize!. It should iterate through all the ::columns, using define_method (twice) to create a getter and setter method for each column, just like my_attr_accessor. But this time, instead of dynamically creating an instance variable, store everything in the #attributes hash.
 
@@ -163,7 +165,7 @@ Hint: we need to call ::columns on a class object, not the instance. For example
 Note that dog.class == Dog. How can we use the Object#class method to access the ::columns class method from inside the #initialize instance method?
 
 Run the specs, Luke!
-Phase Ie: ::all, ::parse_all
+##Phase Ie: ::all, ::parse_all
 
 We now want to write a method ::all that will fetch all the records from the database. The first thing to do is to try to generate the necessary SQL query to issue. Generate SQL and print it out so you can view and verify it. Use the heredoc syntax to define your query.
 
@@ -267,7 +269,7 @@ This is very similar to the #insert method. To produce the "SET line", I mapped 
 I again used the #attribute_values trick. I additionally passed in the id of the object (for the last ? in the WHERE clause).
 
 Every day I'm testing.
-Phase Ii: #save
+### Phase Ii: #save
 
 Finally, write an instance method SQLObject#save. This should call #insert or #update depending on whether id.nil?. It is not intended that the user call #insert or #update directly (leave them public so the specs can call them :-)).
 
